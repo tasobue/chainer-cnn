@@ -35,8 +35,8 @@ n_epoch     = args.epoch        # エポック数(パラメータ更新回数)
 
 # Prepare dataset
 dataset, height, width = util.load_data(args.data)
-print 'height:', height
-print 'width:', width
+print('height:', height)
+print('width:', width)
 
 dataset['source'] = dataset['source'].astype(np.float32) #特徴量
 dataset['target'] = dataset['target'].astype(np.int32) #ラベル
@@ -45,6 +45,11 @@ x_train, x_test, y_train, y_test = train_test_split(dataset['source'], dataset['
 N_test = y_test.size         # test data size
 N = len(x_train)             # train data size
 in_units = x_train.shape[1]  # 入力層のユニット数 (語彙数)
+
+print('len(x_train):', len(x_train))
+print('len(x_test):', len(x_test))
+print('len(y_train):', len(y_train))
+print('len(y_test):', len(y_test))
 
 # (nsample, channel, height, width) の4次元テンソルに変換
 input_channel = 1
@@ -55,12 +60,22 @@ x_test  = x_test.reshape(len(x_test), input_channel, height, width)
 n_units = args.nunits
 n_label = 2
 filter_height = 3
-output_channel = 50
-
+#output_channel = 50
+output_channel = 128
+width = 3
+mid_units = 256
 #モデルの定義
-model = L.Classifier( SimpleCNN(input_channel, output_channel, filter_height, width, 950, n_units, n_label))
+print('input_channel', input_channel)
+print('output_channel', output_channel)
+print('filter_height', filter_height)
+print('filter_width', width)
+print('mid_units', mid_units)
+print('n_units', n_units)
+print('n_label', n_label)
+model = L.Classifier( SimpleCNN(input_channel, output_channel, filter_height, width, mid_units, n_units, n_label))
 
 #GPUを使うかどうか
+xp = np
 if args.gpu > 0:
     cuda.check_cuda_available()
     cuda.get_device(args.gpu).use()
@@ -74,10 +89,15 @@ n_epoch = args.epoch
 optimizer = optimizers.AdaGrad()
 optimizer.setup(model)
 
+# " model,optimizerに読み込む
+#serializers.load_npz('./model/pn_classifier_cnn.model', model)
+#serializers.load_npz('./model/pn_classifier_cnn.state', optimizer)
+
+
 # Learning loop
 for epoch in six.moves.range(1, n_epoch + 1):
 
-    print 'epoch', epoch, '/', n_epoch
+    print('epoch', epoch, '/', n_epoch)
     
     # training)
     perm = np.random.permutation(N) #ランダムな整数列リストを取得
@@ -88,7 +108,7 @@ for epoch in six.moves.range(1, n_epoch + 1):
         #perm を使い x_train, y_trainからデータセットを選択 (毎回対象となるデータは異なる)
         x = chainer.Variable(xp.asarray(x_train[perm[i:i + batchsize]])) #source
         t = chainer.Variable(xp.asarray(y_train[perm[i:i + batchsize]])) #target
-        
+
         optimizer.update(model, x, t)
 
         sum_train_loss      += float(model.loss.data) * len(t.data)   # 平均誤差計算用
@@ -115,13 +135,13 @@ for epoch in six.moves.range(1, n_epoch + 1):
 
     if epoch > 10:
         optimizer.lr *= 0.97
-        print 'learning rate: ', optimizer.lr
+        print('learning rate: ', optimizer.lr)
 
     sys.stdout.flush()
 
 #modelとoptimizerを保存
-print 'save the model'
+print('save the model')
 serializers.save_npz('./model/pn_classifier_cnn.model', model)
-print 'save the optimizer'
+print('save the optimizer')
 serializers.save_npz('./model/pn_classifier_cnn.state', optimizer)
 

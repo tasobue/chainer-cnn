@@ -1,9 +1,17 @@
 # chainer-cnn
-Simple Convolutional Neural Network for sentence classification (positive or negative) .  
+Simple Convolutional Neural Network for sentence classification (positive or negative) .
+
 
 # Requirements
 This code is written in Python with Chainer which is framework of Deep Neural Network.  
-Please download `GoogleNews-vectors-negative300.bin.gz` from [this site](https://code.google.com/archive/p/word2vec/) and put it in the same directory as these codes.  
+Please download `latest-ja-word2vec-gensim-model` from [this site](http://public.shiroyagi.s3.amazonaws.com/latest-ja-word2vec-gensim-model.zip) and put it in the 'shiroyagi' directory as these codes.  
+ex) shiroyagi/latest-ja-word2vec-gensim-model/word2vec.gensim.model
+					     word2vec.gensim.model.syn1neg.npy
+					     word2vec.gensim.model.wv.syn0.npy
+
+Please Modify L.Convolution2D Parameter and F.max_pooling_2d Parameter in SimpleCNN.py  
+as word2vec list data which is resulted from your input documents matches.
+
 
 # Usage
 ```
